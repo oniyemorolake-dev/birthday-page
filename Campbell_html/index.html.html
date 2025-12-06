@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0d47a1" />
+  <title>Happy Birthday, My Love 💙</title>
+
+  <style>
+    :root {
+      --blue-900: #0d47a1;
+      --blue-800: #1565c0;
+      --blue-700: #1976d2;
+      --blue-500: #2196f3;
+      --blue-300: #64b5f6;
+      --blue-100: #bbdefb;
+
+      --text: #ffffff;
+      --card-bg: rgba(255, 255, 255, 0.12);
+      --card-border: rgba(255, 255, 255, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, var(--blue-900), var(--blue-700) 55%, var(--blue-300));
+      overflow-x: hidden;
+    }
+
+    .page { max-width: 1000px; margin: 0 auto; padding: 32px 20px 120px; position: relative; }
+    .hero { text-align: center; margin: 12px 0 24px; }
+    .hero h1 { font-size: clamp(2rem, 4vw + 1rem, 3.2rem); margin: 0 0 8px; }
+    .subtitle { opacity: 0.9; margin: 0; }
+
+    .envelope-section { display: grid; place-items: center; margin: 28px 0 8px; }
+    .envelope { position: relative; padding: 12px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(6px); cursor: pointer; transition: transform 0.3s ease; touch-action: manipulation; }
+    .envelope:active { transform: scale(0.99); }
+    .envelope:focus-visible { outline: 3px solid var(--blue-300); }
+    .envelope-svg { width: clamp(240px, 70vw, 360px); height: auto; display: block; }
+
+    .flap { transform-origin: 150px 40px; transition: transform 700ms cubic-bezier(.19,.77,.3,1.2); }
+    .letter { transform-origin: 150px 180px; transition: transform 600ms ease, opacity 600ms ease; }
+
+    .hint { text-align: center; font-size: 0.95rem; margin-top: 10px; opacity: 0.85; animation: hintPulse 1.8s ease-in-out infinite; }
+    @keyframes hintPulse { 0%,100%{opacity:0.85;transform:translateY(0);}50%{opacity:1;transform:translateY(-2px);} }
+
+    .envelope.opened .flap { transform: rotateX(170deg) translateY(-4px); }
+    .envelope.opened .letter { transform: translateY(-18px); opacity: 0.95; }
+
+    .cake-section { display: grid; place-items: center; margin: 18px 0 26px; }
+    .cake { opacity: 0; transform: scale(0.92) translateY(12px); transition: opacity 600ms ease, transform 600ms ease; text-align: center; }
+    .cake.show { opacity: 1; transform: scale(1) translateY(0); }
+    .cake-svg { width: clamp(240px, 70vw, 360px); height: auto; display: block; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.25)); }
+    .cake-caption { margin-top: 8px; opacity: 0.95; }
+
+    .flame { transform-origin: center; animation: flicker 1.2s infinite ease-in-out; }
+    .flame:nth-child(1) { animation-delay: 0s; }
+    .flame:nth-child(2) { animation-delay: 0.18s; }
+    .flame:nth-child(3) { animation-delay: 0.35s; }
+    @keyframes flicker { 0%,100%{transform:scale(1);fill:#ffb74d;}50%{transform:scale(1.1);fill:#ffcc80;} }
+
+    .messages-section { display: grid; place-items: center; margin-top: 10px; }
+    .message-card { width: min(820px,92vw); padding:24px 22px; border-radius:16px; background:var(--card-bg); border:1px solid var(--card-border); backdrop-filter: blur(6px); opacity:0; transform:translateY(12px); transition: opacity 600ms ease, transform 600ms ease; }
+    .message-card.show { opacity:1; transform:translateY(0); }
+    .message-card h2 { margin:0 0 10px; font-size:clamp(1.4rem,2vw +1rem,2rem); }
+    .message-body p { line-height:1.6; margin:8px 0; }
+
+    .footer { text-align: center; margin-top: 26px; opacity:0.85; }
+
+    .confetti-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999; }
+
+    .audio-controls button {
+      margin: 0 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      background: var(--blue-500);
+      color: var(--text);
+    }
+    .audio-controls button:hover { background: var(--blue-700); }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- Audio Controls -->
+  <div class="audio-controls" style="text-align:center; margin:12px 0;">
+    <button id="playBtn">▶️ Play</button>
+    <button id="pauseBtn">⏸️ Pause</button>
+  </div>
+  <audio id="bgAudio" src="Moon.mp3" loop></audio>
+
+  <main class="page">
+    <header class="hero">
+      <h1>Happy Birthday, Love! 🎂</h1>
+      <p class="subtitle">I made this just for you 💙</p>
+    </header>
+
+    <!-- Envelope Section -->
+    <section class="envelope-section" aria-label="Birthday envelope">
+      <div id="envelope" class="envelope" role="button" tabindex="0" aria-label="Open birthday envelope">
+        <svg class="envelope-svg" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="20" y="40" width="260" height="140" rx="10" fill="#e3f2fd" stroke="#90caf9" stroke-width="3"></rect>
+          <rect class="letter" x="30" y="55" width="240" height="120" rx="8" fill="#ffffff" stroke="#bbdefb" stroke-width="2"></rect>
+          <text x="150" y="115" text-anchor="middle" fill="#1976d2" font-size="22" font-weight="600" font-family="system-ui, -apple-system, Segoe UI, Arial">💙 Open me 💙</text>
+          <path class="flap" d="M20,40 L150,140 L280,40 Z" fill="#1565c0" stroke="#0d47a1" stroke-width="3"></path>
+          <path d="M20,180 L150,85 L280,180" fill="#bbdefb" stroke="#90caf9" stroke-width="3"></path>
+        </svg>
+        <div class="hint">Tap the envelope 🎵</div>
+      </div>
+    </section>
+
+    <!-- Cake Section -->
+    <section id="cakeSection" class="cake-section" aria-label="Birthday cake">
+      <div class="cake" id="cake">
+        <svg class="cake-svg" viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <ellipse cx="150" cy="190" rx="120" ry="15" fill="#e0e0e0"></ellipse>
+          <rect x="60" y="100" width="180" height="70" rx="10" fill="#ffe0b2" stroke="#ffcc80" stroke-width="3"></rect>
+          <path d="M60,100 H240 V130 C230,138 220,125 210,130 C200,138 190,125 180,130 C170,138 160,125 150,130 C140,138 130,125 120,130 C110,138 100,125 90,130 C80,138 70,125 60,130 Z" fill="#fff" stroke="#f5f5f5" stroke-width="2"></path>
+          <rect x="100" y="75" width="10" height="25" fill="#64b5f6"></rect>
+          <rect x="145" y="75" width="10" height="25" fill="#42a5f5"></rect>
+          <rect x="190" y="75" width="10" height="25" fill="#2196f3"></rect>
+          <g class="flame-group">
+            <path class="flame" d="M105,70 C102,65 108,65 105,60 C110,68 108,72 105,70 Z" fill="#ffb74d"></path>
+            <path class="flame" d="M150,70 C147,65 153,65 150,60 C155,68 153,72 150,70 Z" fill="#ffb74d"></path>
+            <path class="flame" d="M195,70 C192,65 198,65 195,60 C200,68 198,72 195,70 Z" fill="#ffb74d"></path>
+          </g>
+        </svg>
+        <p class="cake-caption">Make a wish, my love ✨</p>
+      </div>
+    </section>
+
+    <!-- Message Section -->
+    <section id="messageSection" class="messages-section" aria-label="Dedicated message">
+      <div class="card message-card" id="messageCard" aria-live="polite">
+        <h2>For you, my love 💙</h2>
+        <div class="message-body">
+          <p>Hey my love, it’s your birthday, and you asked me not to do anything too much—but you made my day special, and I’m returning the favor in my own little and intimate way. I love you so much, and I appreciate the day you were born—without that day I would not have known you. I’m excited for you; I’m happy and proud of the man you’re becoming. 💙</p>
+          <p>Every morning I wake up, all I see is your beautiful face. I see you in my dreams; I see you everywhere. You make me so happy, and I’m so glad you were born. It’s a shame that you aren’t here for us to celebrate quietly, as you want—but as you said, we’re going to run it back when we’re together, so we can celebrate ourselves. 💙💙</p>
+          <p>I appreciate every part of you; I love everything about you, and all I can think of is being married to you one day and spending every second of our lives together—till death. I love you every day; I’ve loved you since the day you said you loved me. You make everything complete, and I will keep waiting for you. I cannot wait to see you—to kiss you, to hug you, and to squeeze you tightly. WHATTTT, I’m going to squeeze your head when I see you. 💙</p>
+          <p>I will respect your wishes and not write anything long. Let’s not overwhelm you, my love. Anyway, have a wonderful day, and know I love you. I will always make you feel special—because you are. Happiest Birthday, Campbell, my love. 💙💙💙</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Made with love by Morolake 💙</p>
+    </footer>
+  </main>
+
+  <script>
+    const envelope = document.getElementById('envelope');
+    const cake = document.getElementById('cake');
+    const messageCard = document.getElementById('messageCard');
+    const bgAudio = document.getElementById('bgAudio');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+
+    // Autoplay attempt
+    window.addEventListener('DOMContentLoaded', () => {
+      bgAudio.play().catch(() => console.log('Autoplay blocked, click play'));
+      startConfetti({ duration: 3500 });
+    });
+
+    // Envelope interaction
+    function openEnvelope() {
+      if (envelope.classList.contains('opened')) return;
+      envelope.classList.add('opened');
+      startConfetti({ duration: 4000 });
+      setTimeout(() => cake.classList.add('show'), 1200);
+      setTimeout(() => messageCard.classList.add('show'), 1500);
+      bgAudio.play().catch(() => {});
+    }
+
+    envelope.addEventListener('click', openEnvelope);
+    envelope.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEnvelope(); }
+    });
+
+    // Audio buttons
+    playBtn.addEventListener('click', () => bgAudio.play());
+    pauseBtn.addEventListener('click', () => bgAudio.pause());
+
+    // Confetti
+    function startConfetti({ duration=3000 }={}) {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      let W = canvas.width = window.innerWidth;
+      let H = canvas.height = window.innerHeight;
+
+      const bluePalette = ['#0d47a1','#1565c0','#1976d2','#2196f3','#42a5f5','#64b5f6','#bbdefb','#ffffff'];
+      const pieces = [];
+      const pieceCount = Math.floor((W*H)/22000)+120;
+      const rand = (min,max)=>Math.random()*(max-min)+min;
+
+      for(let i=0;i<pieceCount;i++){
+        pieces.push({x:rand(0,W),y:rand(-H,0),size:rand(2,6),speed:rand(1.2,3.4),rotation:rand(0,Math.PI*2),rotationSpeed:rand(-0.05,0.05),color:bluePalette[Math.floor(rand(0,bluePalette.length))],shape:Math.random()<0.5?'circle':'rect',drift:rand(-0.6,0.6)});
+      }
+
+      let start = performance.now(), running = true;
+      function draw(time){
+        if(!running) return;
+        const elapsed = time-start;
+        if(elapsed>duration) running=false;
+        ctx.clearRect(0,0,W,H);
+        for(const p of pieces){
+          p.y+=p.speed; p.x+=p.drift; p.rotation+=p.rotationSpeed;
+          if(p.y>H+10){p.y=-10;p.x=rand(0,W);}
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rotation); ctx.fillStyle=p.color;
+          if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.size,0,Math.PI*2);ctx.fill();}
+          else ctx.fillRect(-p.size,-p.size/2,p.size*2,p.size);
+          ctx.restore();
+        }
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+      function onResize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+      window.addEventListener('resize',onResize,{passive:true});
+      setTimeout(()=>{running=false;ctx.clearRect(0,0,W,H);window.removeEventListener('resize',onResize);},duration+200);
+    }
+  </script>
+</body>
+</html>
